@@ -33,9 +33,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Singleton
 public class CrawlerHandler {
     private final Logger LOGGER = LoggerFactory.getLogger(CrawlerHandler.class);
-    private Config config = Tools.loadCustomize(Constants.CONFIG_CUSTOMIZE);
+    @Inject private Config config;
     @Inject private CrawlerThreadPool crawlerThreadPool;
     @Inject private ProxyManager proxyManager;
+
+    @Inject
+    public CrawlerHandler(Config config){
+        this.config = config;
+    }
 
     public List<String> getKeywords() {
         File keywordsFile = new File("keywords.txt");

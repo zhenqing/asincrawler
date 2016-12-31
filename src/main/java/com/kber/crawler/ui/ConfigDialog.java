@@ -36,7 +36,7 @@ public class ConfigDialog extends JDialog {
     private JTextField threadCount;
     private JTextField startLine;
     private Config config = Tools.loadCustomize(CONFIG_CUSTOMIZE);
-    @Inject CrawlerHandler crawlerHandler;
+    @Inject private CrawlerHandler crawlerHandler = new CrawlerHandler(Tools.loadCustomize(CONFIG_CUSTOMIZE));
     private static String comboBoxItems[] = {Country.US.name(), Country.UK.name(), Country.CA.name(), Country.ES.name(), Country.JP.name(), Country.FR.name(), Country.DE.name(), Country.IT.name(), Country.IN.name()};
 
     public ConfigDialog() {
