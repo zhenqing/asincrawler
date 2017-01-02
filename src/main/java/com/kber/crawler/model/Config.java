@@ -19,5 +19,4 @@ public class Config {
     private boolean needProxy;
     private boolean multiThread;
     private int threadCount;
-    private int startLine;
 }

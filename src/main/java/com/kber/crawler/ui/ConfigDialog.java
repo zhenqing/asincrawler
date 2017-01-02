@@ -2,22 +2,16 @@ package com.kber.crawler.ui;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.kber.crawler.Crawler;
 import com.kber.crawler.CrawlerHandler;
 import com.kber.crawler.model.Config;
 import com.kber.crawler.model.Country;
-import com.kber.crawler.utils.Constants;
-import com.kber.crawler.utils.Customize;
 import com.kber.crawler.utils.Tools;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 
 import static com.kber.crawler.utils.Constants.CONFIG_CUSTOMIZE;
@@ -36,7 +30,7 @@ public class ConfigDialog extends JDialog {
     private JTextField threadCount;
     private JTextField startLine;
     private Config config = Tools.loadCustomize(CONFIG_CUSTOMIZE);
-    @Inject private CrawlerHandler crawlerHandler = new CrawlerHandler(Tools.loadCustomize(CONFIG_CUSTOMIZE));
+    @Inject private CrawlerHandler crawlerHandler = new CrawlerHandler();
     private static String comboBoxItems[] = {Country.US.name(), Country.UK.name(), Country.CA.name(), Country.ES.name(), Country.JP.name(), Country.FR.name(), Country.DE.name(), Country.IT.name(), Country.IN.name()};
 
     public ConfigDialog() {
@@ -66,8 +60,6 @@ public class ConfigDialog extends JDialog {
         threadCount = new JTextField(10);
         threadCount.setText(Integer.toString(config.getThreadCount()));
         final JLabel startLable = new JLabel("Start line:");
-        startLine = new JTextField(2);
-        startLine.setText(Integer.toString(config.getStartLine()));
         final JButton jb_saveConfig = new JButton("Save Config");
         final JButton jb_run = new JButton("Run");
         pane.setLayout(layout);
@@ -86,9 +78,6 @@ public class ConfigDialog extends JDialog {
                         .addComponent(threadLable, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(threadCount, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(10)
-                        .addComponent(startLable, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(startLine, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(10)
                         .addComponent(jb_saveConfig, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(10)
                         .addComponent(jb_run, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -105,8 +94,6 @@ public class ConfigDialog extends JDialog {
                                 .addComponent(jt_seller, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(threadLable, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(threadCount, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(startLable, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(startLine, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jb_saveConfig, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jb_run, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addComponent(jb_run, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -125,7 +112,7 @@ public class ConfigDialog extends JDialog {
                 System.out.println("start to run");
                 jb_run.setText("Running");
                 try {
-                    crawlerHandler.execute();
+                    crawlerHandler.execute(config);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -142,7 +129,6 @@ public class ConfigDialog extends JDialog {
         config.setCountry(Country.getCountry(comboBoxItems[market.getSelectedIndex()]));
         config.setMultiThread(multiThread.isSelected());
         config.setNeedProxy(useProxy.isSelected());
-        config.setStartLine(Integer.parseInt(startLine.getText()));
         config.setThreadCount(Integer.parseInt(threadCount.getText()));
         Tools.saveCustomize(CONFIG_CUSTOMIZE, config);
     }
