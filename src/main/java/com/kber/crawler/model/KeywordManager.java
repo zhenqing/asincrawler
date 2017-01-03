@@ -1,6 +1,5 @@
 package com.kber.crawler.model;
 
-import com.kber.crawler.CrawlerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +30,7 @@ public class KeywordManager {
     }
 
     public void initKeywords() {
-        File keywordFile = new File("keywords.txt");
+        File keywordFile = new File("config//keywords.txt");
         BufferedInputStream fis = null;
         try {
             fis = new BufferedInputStream(new FileInputStream(keywordFile));
@@ -54,7 +53,7 @@ public class KeywordManager {
     }
 
     public void saveLeftKeywords() {
-        File keywordFile = new File("keywords.txt");
+        File keywordFile = new File("config//keywords.txt");
         StringBuffer stringBuffer = new StringBuffer();
         BufferedWriter bwr = null;
         try {

@@ -8,9 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-/**
- * <a href="mailto:tmtlindsay@gmail.com">Lindsay Zhao</a> 11/18/2016 2:52 PM
- */
+
 public class AsinParser {
     private final static Logger LOGGER = LoggerFactory.getLogger(AsinParser.class);
 

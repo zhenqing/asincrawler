@@ -12,7 +12,7 @@ import java.text.DecimalFormat;
  */
 public class Constants {
 
-    public static final Customize CONFIG_CUSTOMIZE = new Customize("config.js", Config.class, false);
+    public static final Customize CONFIG_CUSTOMIZE = new Customize("config/config.js", Config.class, false);
 
     public static final String HTTP = "http";
 

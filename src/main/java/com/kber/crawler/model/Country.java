@@ -1,12 +1,9 @@
 package com.kber.crawler.model;
 
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.*;
 
-/**
- * <a href="mailto:tmtlindsay@gmail.com">Lindsay Zhao</a> 11/15/2016 5:32 PM
- */
+
 public enum Country {
     US("$", "com", "US", "ATVPDKIKX0DER"),
     CA("CDN$", "ca", "CA", "A2EUQ1WTGCTBG2"),

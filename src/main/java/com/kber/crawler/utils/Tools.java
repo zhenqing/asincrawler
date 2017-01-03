@@ -3,12 +3,10 @@ package com.kber.crawler.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
 import com.kber.crawler.model.Config;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
 import org.nutz.lang.Lang;
 import org.slf4j.Logger;
@@ -25,9 +23,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-/**
- * <a href="mailto:tmtlindsay@gmail.com">Lindsay Zhao</a> 12/21/2016 3:45 PM
- */
+
 public class Tools {
     private static final Logger LOGGER = LoggerFactory.getLogger(Tools.class);
 

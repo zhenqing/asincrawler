@@ -3,26 +3,38 @@ package com.kber.crawler;
 import com.google.inject.Inject;
 import com.kber.aop.Repeat;
 import com.kber.crawler.db.AbstractDBManager;
+import com.kber.crawler.db.DBUtils;
 import com.kber.crawler.model.Config;
 import com.kber.crawler.model.Country;
 import com.kber.crawler.model.CrawlLog;
 import com.kber.crawler.model.KeywordManager;
 import com.kber.crawler.proxy.ProxyHost;
 import com.kber.crawler.proxy.ProxyManager;
+import com.kber.crawler.utils.Constants;
 import com.kber.crawler.utils.PageLoadHelper;
 import com.kber.crawler.utils.Tools;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.nutz.dao.Dao;
+import org.nutz.dao.entity.annotation.Table;
+import org.nutz.dao.impl.FileSqlManager;
+import org.nutz.dao.impl.NutDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sqlite.SQLiteConfig;
 
 import javax.inject.Singleton;
+import javax.sql.DataSource;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <a href="mailto:tmtlindsay@gmail.com">Lindsay Zhao</a> 12/26/2016 10:20 AM
  */
 @Singleton
-public class CrawlerHandler extends AbstractDBManager{
+public class CrawlerHandler extends AbstractDBManager {
     private final Logger LOGGER = LoggerFactory.getLogger(CrawlerHandler.class);
     @Inject private CrawlerThreadPool crawlerThreadPool;
     @Inject private ProxyManager proxyManager;
@@ -42,8 +54,28 @@ public class CrawlerHandler extends AbstractDBManager{
     public CrawlerHandler() {
     }
 
-    public void initDataSource() throws Exception {
+    private void initDBDirectory(String absolutePath) {
+        File dir = new File(absolutePath);
+        if (!dir.exists() || !dir.isDirectory()) {
+            if (!dir.mkdirs()) {
+                throw new IllegalStateException(String.format("Failed to create sqlite database file storage directory %s.", dir.getAbsolutePath()));
+            }
+        }
+    }
 
+    @Inject
+    @Override
+    public void initDataSource() throws Exception {
+        String absolutePath = "db";
+        this.initDBDirectory(absolutePath);
+        String url = String.format("jdbc:sqlite:%s/%s.db", absolutePath.replace(Constants.BACKSLASH, Constants.SLASH), this.getDBName());
+        dao = new NutDao(DBUtils.buildSqliteDataSource(url), new FileSqlManager("db/tables.sql"));
+        DBUtils.createTables(dao, "crawl_log", CrawlLog.class.getAnnotation(Table.class).value());
+    }
+
+
+    public String getDBName() {
+        return "crawl_log";
     }
 
     public void execute(Config config) throws IOException {
@@ -61,25 +93,32 @@ public class CrawlerHandler extends AbstractDBManager{
                     LOGGER.info("开始第{}组抓取", threadNumber);
                     int i = 0;
                     AtomicBoolean hasNext;
+
                     for (final String keyword : list) {
-                        CrawlLog log = CrawlLog
+                        CrawlLog log = this.readById(keyword, CrawlLog.class);
+                        if (log != null) {
+                            LOGGER.info("关键词{}已经在{}抓取过了", keyword, log.getLastCrawlTime());
+                            continue;
+                        }
+
                         long beginning1 = System.currentTimeMillis();
                         hasNext = new AtomicBoolean(true);
                         i = i + 1;
-                        for (int n = 1; n < 3; n++) {
+                        for (int n = 1; n < 401; n++) {
                             try {
                                 if (hasNext.get()) {
                                     long beginning2 = System.currentTimeMillis();
                                     hasNext.set(retrieve(config.getCountry(), keyword, config.getCategory(), n, bwr, config));
                                     LOGGER.info("完成第{}组第{}个关键词{}第{}页抓取,耗时{}", threadNumber, i, keyword, n, Tools.formatCostTime(beginning2));
+                                } else {
+                                    break;
                                 }
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
                         }
-//                        keywordManager.removeKeywords(keyword);
-//                        keywordManager.saveLeftKeywords();
-
+                        log = new CrawlLog(keyword, new Date());
+                        this.save(log, CrawlLog.class);
                         LOGGER.info("完成第{}组第{}个关键词抓取,耗时{}", threadNumber, i, Tools.formatCostTime(beginning1));
                     }
                     LOGGER.info("完成第{}组抓取,耗时{}", threadNumber, Tools.formatCostTime(beginning));
@@ -107,6 +146,7 @@ public class CrawlerHandler extends AbstractDBManager{
             if (config.isNeedProxy()) {
                 proxyHost = proxyManager.getProxy();
                 uc = ConnectionPool.getConnection(url, proxyHost);
+                LOGGER.info("use proxy:{}:{}", proxyHost.getAddress(), proxyHost.getPort());
             } else {
                 uc = ConnectionPool.getConnection(url);
             }
@@ -122,9 +162,7 @@ public class CrawlerHandler extends AbstractDBManager{
         } catch (ConnectException e) {
             e.printStackTrace();
             proxyManager.removeProxy(proxyHost);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (in != null) {

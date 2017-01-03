@@ -6,9 +6,7 @@ import com.kber.aop.ProfileModule;
 import com.kber.aop.RepeatModule;
 import com.kber.commons.DateModule;
 
-/**
- * <a href="mailto:tmtlindsay@gmail.com">Lindsay Zhao</a> 12/21/2016 5:43 PM
- */
+
 public class ApplicationContext {
     private ApplicationContext() {
     }

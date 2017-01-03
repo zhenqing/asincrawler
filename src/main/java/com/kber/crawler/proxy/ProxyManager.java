@@ -1,14 +1,11 @@
 package com.kber.crawler.proxy;
 
-import com.google.inject.Inject;
-import com.kber.crawler.service.ApplicationContext;
 import lombok.Data;
 
 import javax.inject.Singleton;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * <a href="mailto:tmtlindsay@gmail.com">Lindsay Zhao</a> 11/18/2016 11:23 AM
@@ -30,7 +27,7 @@ public class ProxyManager {
     }
 
     public void loadProxyList() {
-        File proxyFile = new File("proxy.txt");
+        File proxyFile = new File("config//proxy.txt");
         BufferedInputStream fis = null;
         try {
             fis = new BufferedInputStream(new FileInputStream(proxyFile));
